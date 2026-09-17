@@ -8,8 +8,10 @@ import (
 	"time"
 )
 
-const gmax int = 10 // nb max de goroutine
-const size int = 1 << 20
+const gmax int = 4 // nb max de goroutine
+const size int = 1 << 27
+
+var tab [size]int
 
 func Fill(tab []int, v int) {
 	for pos := range tab {
@@ -56,35 +58,30 @@ func testFill() {
 
 }
 
-func testForEach() {
-	// Initialisation
-	var tab [100]int
+func FillGo(tab []int, v int) {
+	var wg sync.WaitGroup
 
-	f := func(c int) int {
-		return int(math.Sqrt(v2.Float64() * 100))
+	for i := range gmax {
+		ssize := size / gmax
+		start := i * ssize
+		stop := (i + 1) * ssize
+
+		wg.Add(1)
+
+		go func() {
+			Fill(tab[start:stop], v)
+			defer wg.Done()
+		}()
 	}
 
-	// Affichage
-	fmt.Println("Mode Normal")
+	wg.Add(1)
 
-	t1 := time.Now()
-	ForEach(tab[:], f)
-	fmt.Println(time.Since(t1))
+	go func() {
+		Fill(tab[size%gmax:], v)
+		defer wg.Done()
+	}()
 
-	fmt.Println("Mode Concurentielle")
-
-	t2 := time.Now()
-
-	//go ForEach(tab[:], f)
-
-	for i := 0; i < len(tab); i = i + len(tab)/10 {
-		//fmt.Println("départ :", i)
-		//fmt.Println("fin : ", i+len(tab)/10-1)
-		go ForEach(tab[i:i+len(tab)/10], f)
-	}
-
-	fmt.Println(time.Since(t2))
-
+	wg.Wait()
 }
 
 func correction(tab []int, f func(int) int) {
@@ -113,7 +110,25 @@ func correction(tab []int, f func(int) int) {
 	wg.Wait()
 }
 
+func operation(c int) int {
+	return int(math.Sqrt(v2.Float64() * 100))
+}
+
 func main() {
-	testForEach()
-	fmt.Scanln()
+
+	//testForEach()
+
+	fmt.Print("Mode Normal : ")
+
+	t1 := time.Now()
+	Fill(tab[:], 3)
+
+	fmt.Println(time.Since(t1))
+
+	fmt.Print("Mode Concurentielle : ")
+
+	t2 := time.Now()
+	FillGo(tab[:], 3)
+	fmt.Println(time.Since(t2))
+
 }
