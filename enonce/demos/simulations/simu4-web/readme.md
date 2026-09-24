@@ -1,0 +1,3 @@
+# Simulation v4
+
+- les agents sont des goroutines et sont toutes indépendantes...
