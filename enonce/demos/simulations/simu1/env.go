@@ -1,0 +1,46 @@
+package simulation
+
+import "fmt"
+
+type Environment struct {
+	ags        []Agent
+	agentCount int
+	in         uint64
+	out        uint64
+	noopCount  uint64
+}
+
+func NewEnvironment(ags []Agent) (env *Environment) {
+	return &Environment{ags: ags, agentCount: len(ags)}
+	// return &Environment{ags, len(ags), 0, 0, 0}
+}
+
+func (env *Environment) Do(a Action, c Coord) (err error) {
+	switch a {
+	case Mark:
+		if c[0] < 0 || c[0] > 1 || c[1] < 0 || c[1] > 1 {
+			return fmt.Errorf("bad coordinates (%f,%f)", c[0], c[1])
+		}
+
+		if c[0]*c[0]+c[1]*c[1] <= 1 {
+			env.in++
+		} else {
+			env.out++
+		}
+		return nil
+
+	case Noop:
+		env.noopCount++
+		return nil
+	}
+
+	return fmt.Errorf("bad action number %d", a)
+}
+
+func (env *Environment) PI() float64 {
+	return 4 * float64(env.in) / (float64(env.out) + float64(env.in))
+}
+
+func (env *Environment) Rect() Rect {
+	return Rect{Coord{0, 0}, Coord{1, 1}}
+}
