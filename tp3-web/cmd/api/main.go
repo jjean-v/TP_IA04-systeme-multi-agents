@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,13 +20,23 @@ type Data struct {
 	Tab []Model `json:"data"`
 }
 
-type Request struct {
-	Model string `json:"model"`
-	Messages string `json:"messages"`
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
-type Message struc {
-	Role string `json:"role"`
+type Request struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
+}
+
+type ContentResponse struct {
+	Message Message `json:"message"`
+}
+
+type ResponseRequest struct {
+	Model   string            `json:"model"`
+	Choices []ContentResponse `json:"choices"`
 }
 
 var GROQ_KEY = os.Getenv("GROQ_API_KEY")
@@ -58,9 +69,28 @@ func getModel() {
 	}
 }
 
-func chatWitModels() {
-	req, _ := http.NewRequest("POST", "https://api.groq.com/openai/v1/chat/completions", nil)
+func chatWitModels(question string) {
+
+	// Prepare the request
+	message := []Message{Message{"user", question}}
+
+	request := Request{"openai/gpt-oss-20b", message}
+
+	buffer, errMarshal2 := json.Marshal(request)
+	if errMarshal2 != nil {
+		log.Fatal(errMarshal2)
+	}
+
+	req, errCreateRequest := http.NewRequest("POST", "https://api.groq.com/openai/v1/chat/completions", bytes.NewBuffer(buffer))
+	if errCreateRequest != nil {
+		fmt.Println("Error creating request:", errCreateRequest)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+GROQ_KEY)
+
+	// Send the request
 	resp, errRequest := http.DefaultClient.Do(req)
 
 	if errRequest != nil {
@@ -71,9 +101,21 @@ func chatWitModels() {
 
 	body, _ := io.ReadAll(resp.Body)
 
+	// Unmarshal the response
+	var response ResponseRequest
+
+	errMarshal3 := json.Unmarshal(body, &response)
+
+	if errMarshal3 != nil {
+		log.Fatal(errMarshal3)
+	}
+
+	for _, element := range response.Choices {
+		fmt.Println(element)
+	}
 }
 
 func main() {
-	getModel()
+	chatWitModels("explique moi le théorème de pythagore")
 
 }
