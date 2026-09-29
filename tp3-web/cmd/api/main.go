@@ -41,9 +41,8 @@ type ResponseRequest struct {
 
 var GROQ_KEY = os.Getenv("GROQ_API_KEY")
 
-func getModel() {
-
-	req, _ := http.NewRequest("GET", "https://api.groq.com/openai/v1/models", nil)
+func SendRequest(method string, url string) []byte {
+	req, _ := http.NewRequest(method, url, nil)
 	req.Header.Add("Authorization", "Bearer "+GROQ_KEY)
 	resp, errRequest := http.DefaultClient.Do(req)
 
@@ -51,9 +50,16 @@ func getModel() {
 		fmt.Println("Error")
 		fmt.Println(errRequest)
 	}
-	defer resp.Body.Close()
 
+	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
+	return body
+
+}
+
+func getModel() {
+
+	body := SendRequest("GET", "https://api.groq.com/openai/v1/models")
 
 	var response Data
 
@@ -116,6 +122,7 @@ func chatWitModels(question string) {
 }
 
 func main() {
-	chatWitModels("explique moi le théorème de pythagore")
+	//chatWitModels("combien font 2+2")
+	getModel()
 
 }
