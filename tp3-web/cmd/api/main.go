@@ -41,9 +41,27 @@ type ResponseRequest struct {
 
 var GROQ_KEY = os.Getenv("GROQ_API_KEY")
 
-func SendRequest(method string, url string) []byte {
-	req, _ := http.NewRequest(method, url, nil)
+func SendRequestGet(url string) []byte {
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "Bearer "+GROQ_KEY)
+	resp, errRequest := http.DefaultClient.Do(req)
+
+	if errRequest != nil {
+		fmt.Println("Error")
+		fmt.Println(errRequest)
+	}
+
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	return body
+
+}
+
+func SendRequestPost(url string, data []byte) []byte {
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+GROQ_KEY)
+
 	resp, errRequest := http.DefaultClient.Do(req)
 
 	if errRequest != nil {
@@ -69,13 +87,12 @@ func JsonResponse(body []byte, result any) any {
 
 func getModel() {
 
-	body := SendRequest("GET", "https://api.groq.com/openai/v1/models")
+	body := SendRequestGet("https://api.groq.com/openai/v1/models")
 
 	var response Data
 
 	JsonResponse(body, &response)
 
-	//fmt.Println(response)
 	for _, element := range response.Tab {
 		fmt.Println(element)
 	}
@@ -93,33 +110,15 @@ func chatWitModels(question string) {
 		log.Fatal(errMarshal2)
 	}
 
-	req, errCreateRequest := http.NewRequest("POST", "https://api.groq.com/openai/v1/chat/completions", bytes.NewBuffer(buffer))
-	if errCreateRequest != nil {
-		fmt.Println("Error creating request:", errCreateRequest)
-		return
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+GROQ_KEY)
-
-	// Send the request
-	resp, errRequest := http.DefaultClient.Do(req)
-
-	if errRequest != nil {
-		fmt.Println("Error")
-		fmt.Println(errRequest)
-	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
+	body := SendRequestPost("https://api.groq.com/openai/v1/chat/completions", buffer)
 
 	// Unmarshal the response
 	var response ResponseRequest
 
-	errMarshal3 := json.Unmarshal(body, &response)
+	err := json.Unmarshal(body, &response)
 
-	if errMarshal3 != nil {
-		log.Fatal(errMarshal3)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for _, element := range response.Choices {
@@ -128,7 +127,7 @@ func chatWitModels(question string) {
 }
 
 func main() {
-	//chatWitModels("combien font 2+2")
+	chatWitModels("combien font 2+2")
 	getModel()
 
 }
