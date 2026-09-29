@@ -57,17 +57,23 @@ func SendRequest(method string, url string) []byte {
 
 }
 
+func JsonResponse(body []byte, result any) any {
+
+	err := json.Unmarshal(body, result)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return result
+}
+
 func getModel() {
 
 	body := SendRequest("GET", "https://api.groq.com/openai/v1/models")
 
 	var response Data
 
-	errMarshal := json.Unmarshal(body, &response)
-
-	if errMarshal != nil {
-		log.Fatal(errMarshal)
-	}
+	JsonResponse(body, &response)
 
 	//fmt.Println(response)
 	for _, element := range response.Tab {
