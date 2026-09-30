@@ -10,10 +10,18 @@ import (
 	"os"
 )
 
+const URL_MODEL_LIST = "https://api.groq.com/openai/v1/models"
+const URL_MODEL_QUESTIONS = "https://api.groq.com/openai/v1/chat/completions"
+
+var GROQ_KEY = os.Getenv("GROQ_API_KEY")
+
 type Model struct {
 	Id                    string `json:"id"`
 	Max_completion_tokens int    `json:"max_completions_token"`
 	Name                  string `json:"name"`
+	Owned_by              string
+	Input_modalities      []string `json:"input_modalities"`
+	Output_modalities     []string `json:"output_modalities"`
 }
 
 type Data struct {
@@ -38,8 +46,6 @@ type ResponseRequest struct {
 	Model   string            `json:"model"`
 	Choices []ContentResponse `json:"choices"`
 }
-
-var GROQ_KEY = os.Getenv("GROQ_API_KEY")
 
 func SendRequestGet(url string) []byte {
 	req, _ := http.NewRequest("GET", url, nil)
@@ -87,14 +93,18 @@ func JsonResponse(body []byte, result any) any {
 
 func getModel() {
 
-	body := SendRequestGet("https://api.groq.com/openai/v1/models")
+	body := SendRequestGet(URL_MODEL_LIST)
 
 	var response Data
 
 	JsonResponse(body, &response)
 
 	for _, element := range response.Tab {
-		fmt.Println(element)
+		fmt.Println("======================= Model =======================")
+		fmt.Println("Name: ", element.Name)
+		fmt.Println("Input: ", element.Input_modalities)
+		fmt.Println("Input: ", element.Output_modalities)
+
 	}
 }
 
@@ -110,7 +120,7 @@ func chatWitModels(question string) {
 		log.Fatal(errMarshal2)
 	}
 
-	body := SendRequestPost("https://api.groq.com/openai/v1/chat/completions", buffer)
+	body := SendRequestPost(URL_MODEL_QUESTIONS, buffer)
 
 	// Unmarshal the response
 	var response ResponseRequest
@@ -122,12 +132,12 @@ func chatWitModels(question string) {
 	}
 
 	for _, element := range response.Choices {
-		fmt.Println(element)
+		fmt.Println(element.Message.Content)
 	}
 }
 
 func main() {
-	chatWitModels("combien font 2+2")
-	getModel()
+	chatWitModels("Quelle est la date d'aujourd'hui ?")
+	//getModel()
 
 }
