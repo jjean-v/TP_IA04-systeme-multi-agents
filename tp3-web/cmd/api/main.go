@@ -13,13 +13,19 @@ import (
 const URL_MODEL_LIST = "https://api.groq.com/openai/v1/models"
 const URL_MODEL_QUESTIONS = "https://api.groq.com/openai/v1/chat/completions"
 
+const MODEL_IA_GPT_OSS_20B = "openai/gpt-oss-20b"
+const MODEL_IA_GPT_OSS_SAFEGUARD_20B = "openai/gpt-oss-safeguard-20b"
+const MODEL_IA_META_PROMPT_GUARD_2_86M = "meta-llama/llama-prompt-guard-2-86m"
+const MODEL_IA_META_PROMPT_GUARD_2_22M = "meta-llama/llama-prompt-guard-2-22m"
+const MODEL_IA_SDAIA_ALLAM_2_7B = "allam-2-7b"
+
 var GROQ_KEY = os.Getenv("GROQ_API_KEY")
 
 type Model struct {
-	Id                    string `json:"id"`
-	Max_completion_tokens int    `json:"max_completions_token"`
-	Name                  string `json:"name"`
-	Owned_by              string
+	Id                    string   `json:"id"`
+	Max_completion_tokens int      `json:"max_completions_token"`
+	Name                  string   `json:"name"`
+	Owned_by              string   `json:"owned_by"`
 	Input_modalities      []string `json:"input_modalities"`
 	Output_modalities     []string `json:"output_modalities"`
 }
@@ -101,19 +107,21 @@ func getModel() {
 
 	for _, element := range response.Tab {
 		fmt.Println("======================= Model =======================")
+		fmt.Println("Id: ", element.Id)
 		fmt.Println("Name: ", element.Name)
+		fmt.Println("Owned by: ", element.Owned_by)
 		fmt.Println("Input: ", element.Input_modalities)
 		fmt.Println("Input: ", element.Output_modalities)
 
 	}
 }
 
-func chatWitModels(question string) {
+func chatWitModels(question string, ia string) {
 
 	// Prepare the request
 	message := []Message{Message{"user", question}}
 
-	request := Request{"openai/gpt-oss-20b", message}
+	request := Request{ia, message}
 
 	buffer, errMarshal2 := json.Marshal(request)
 	if errMarshal2 != nil {
@@ -137,7 +145,7 @@ func chatWitModels(question string) {
 }
 
 func main() {
-	chatWitModels("Quelle est la date d'aujourd'hui ?")
+	chatWitModels("What s the date today ?", "canopylabs/orpheus-v1-english")
 	//getModel()
 
 }
