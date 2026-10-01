@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 const URL_MODEL_LIST = "https://api.groq.com/openai/v1/models"
@@ -15,8 +16,7 @@ const URL_MODEL_QUESTIONS = "https://api.groq.com/openai/v1/chat/completions"
 
 const MODEL_IA_GPT_OSS_20B = "openai/gpt-oss-20b"
 const MODEL_IA_GPT_OSS_SAFEGUARD_20B = "openai/gpt-oss-safeguard-20b"
-const MODEL_IA_META_PROMPT_GUARD_2_86M = "meta-llama/llama-prompt-guard-2-86m"
-const MODEL_IA_META_PROMPT_GUARD_2_22M = "meta-llama/llama-prompt-guard-2-22m"
+const MODEL_IA_ALIBABA_QWEN_3_8_27B = "qwen/qwen3.8-27b"
 const MODEL_IA_SDAIA_ALLAM_2_7B = "allam-2-7b"
 
 var GROQ_KEY = os.Getenv("GROQ_API_KEY")
@@ -144,8 +144,18 @@ func chatWitModels(question string, ia string) {
 	}
 }
 
+func storeConversation() {
+	wd, _ := os.Getwd()
+
+	path1 := filepath.Join(wd, "tp3-web", "cmd", "api", "conversation", "chat1.md")
+
+	if err := os.WriteFile(path1, []byte("# GOSAMPLES!"), 0666); err != nil {
+		log.Fatal(err)
+	}
+
+}
 func main() {
-	chatWitModels("What s the date today ?", "canopylabs/orpheus-v1-english")
-	//getModel()
+	//chatWitModels("Who are you?", MODEL_IA_SDAIA_ALLAM_2_7B)
+	storeConversation()
 
 }
