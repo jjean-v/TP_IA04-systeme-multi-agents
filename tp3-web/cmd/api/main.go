@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,14 @@ import (
 	"path/filepath"
 )
 
+const CONTEXT_PROMPT = `You are receiving a series of reasoning traces extracted from previous AI responses. 
+	Each trace represents the internal chain of thought the model produced before giving its final answer.
+
+	Your task is to analyze these traces and use it as a context.
+
+	The traces will be provided as a list in the next message, in this format:
+	- reasoning : "<reasoning text>"`
+
 const URL_MODEL_LIST = "https://api.groq.com/openai/v1/models"
 const URL_MODEL_QUESTIONS = "https://api.groq.com/openai/v1/chat/completions"
 
@@ -20,6 +29,10 @@ const MODEL_IA_ALIBABA_QWEN_3_8_27B = "qwen/qwen3.8-27b"
 const MODEL_IA_SDAIA_ALLAM_2_7B = "allam-2-7b"
 
 var GROQ_KEY = os.Getenv("GROQ_API_KEY")
+
+var wd, _ = os.Getwd()
+
+var PATH = filepath.Join(wd, "tp3-web", "cmd", "api", "conversation", "chat1.md")
 
 type Model struct {
 	Id                    string   `json:"id"`
@@ -119,7 +132,7 @@ func getModel() {
 func chatWitModels(question string, ia string) {
 
 	// Prepare the request
-	message := []Message{Message{"user", question}}
+	message := []Message{{"user", CONTEXT_PROMPT}, {"user", "The user says in French: \"je m'appelle Jean\" meaning \"my name is Jean\". They didn't ask a question. We must respond appropriately. The conversation context: we were told to analyze reasoning traces and use them as context. But no traces were provided yet. The user only says \"je m'appelle Jean\". We should respond in French, maybe ask for clarification or ask how to help. Since no explicit instruction, we should respond politely: \"Enchanté Jean\" or \"Bonjour Jean\" and ask how I can help. There's no question, but maybe the system expects an answer that acknowledges the name. So: \"Bonjour Jean, comment puis-je vous aider aujourd'hui?\""}, {"user", question}}
 
 	request := Request{ia, message}
 
@@ -133,29 +146,67 @@ func chatWitModels(question string, ia string) {
 	// Unmarshal the response
 	var response ResponseRequest
 
-	err := json.Unmarshal(body, &response)
+	JsonResponse(body, &response)
 
+	storeConversation("Question: " + question)
+	storeConversation("Reponse: " + string(body))
+	for _, element := range response.Choices {
+		fmt.Println(element.Message.Content)
+		//storeConversation("Response: " + element.Message.Content)
+	}
+}
+
+func storeConversation(message string) {
+
+	file, err := os.OpenFile(PATH, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(fmt.Sprintln(message + "\n"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, element := range response.Choices {
-		fmt.Println(element.Message.Content)
-	}
 }
 
-func storeConversation() {
-	wd, _ := os.Getwd()
-
-	path1 := filepath.Join(wd, "tp3-web", "cmd", "api", "conversation", "chat1.md")
-
-	if err := os.WriteFile(path1, []byte("# GOSAMPLES!"), 0666); err != nil {
-		log.Fatal(err)
+func readLines() ([]string, error) {
+	file, err := os.Open(PATH)
+	if err != nil {
+		return nil, err
 	}
+	defer file.Close()
 
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
 }
+
+func generateContext() []Message {
+	lines, _ := readLines()
+	var message []Message
+	for _, element := range lines {
+		message = append(message, Message{"user", element})
+	}
+	return message
+}
+
 func main() {
-	//chatWitModels("Who are you?", MODEL_IA_SDAIA_ALLAM_2_7B)
-	storeConversation()
+	/*
+		for {
+			fmt.Print("Question: ")
+			reader := bufio.NewReader(os.Stdin)
+			question, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatal(err)
+			}
+			chatWitModels(question, MODEL_IA_GPT_OSS_20B)
+		}
+	*/
+	fmt.Println(generateContext())
 
 }
