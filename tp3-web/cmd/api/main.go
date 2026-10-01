@@ -47,18 +47,24 @@ type Data struct {
 	Tab []Model `json:"data"`
 }
 
-type Message struct {
+type MessageRequest struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
+type MessageResponse struct {
+	Role      string `json:"role"`
+	Content   string `json:"content"`
+	Reasoning string `json:"reasoning"`
+}
+
 type Request struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
+	Model    string           `json:"model"`
+	Messages []MessageRequest `json:"messages"`
 }
 
 type ContentResponse struct {
-	Message Message `json:"message"`
+	Message MessageResponse `json:"message"`
 }
 
 type ResponseRequest struct {
@@ -132,9 +138,15 @@ func getModel() {
 func chatWitModels(question string, ia string) {
 
 	// Prepare the request
-	message := []Message{{"user", CONTEXT_PROMPT}, {"user", "The user says in French: \"je m'appelle Jean\" meaning \"my name is Jean\". They didn't ask a question. We must respond appropriately. The conversation context: we were told to analyze reasoning traces and use them as context. But no traces were provided yet. The user only says \"je m'appelle Jean\". We should respond in French, maybe ask for clarification or ask how to help. Since no explicit instruction, we should respond politely: \"Enchanté Jean\" or \"Bonjour Jean\" and ask how I can help. There's no question, but maybe the system expects an answer that acknowledges the name. So: \"Bonjour Jean, comment puis-je vous aider aujourd'hui?\""}, {"user", question}}
 
-	request := Request{ia, message}
+	// Add previous conversation
+	context := generateContext()
+	message := MessageRequest{"user", question}
+
+	// Add actual question
+	context = append(context, message)
+
+	request := Request{ia, context}
 
 	buffer, errMarshal2 := json.Marshal(request)
 	if errMarshal2 != nil {
@@ -148,11 +160,9 @@ func chatWitModels(question string, ia string) {
 
 	JsonResponse(body, &response)
 
-	storeConversation("Question: " + question)
-	storeConversation("Reponse: " + string(body))
 	for _, element := range response.Choices {
 		fmt.Println(element.Message.Content)
-		//storeConversation("Response: " + element.Message.Content)
+		storeConversation("reasoning: " + element.Message.Reasoning)
 	}
 }
 
@@ -186,27 +196,31 @@ func readLines() ([]string, error) {
 	return lines, scanner.Err()
 }
 
-func generateContext() []Message {
+func generateContext() []MessageRequest {
 	lines, _ := readLines()
-	var message []Message
+	var message []MessageRequest
+
+	message = append(message, MessageRequest{"user", CONTEXT_PROMPT})
 	for _, element := range lines {
-		message = append(message, Message{"user", element})
+		if element != "" {
+			message = append(message, MessageRequest{"user", element})
+		}
 	}
 	return message
 }
 
 func main() {
-	/*
-		for {
-			fmt.Print("Question: ")
-			reader := bufio.NewReader(os.Stdin)
-			question, err := reader.ReadString('\n')
-			if err != nil {
-				log.Fatal(err)
-			}
-			chatWitModels(question, MODEL_IA_GPT_OSS_20B)
+
+	for {
+		fmt.Print("Question: ")
+		reader := bufio.NewReader(os.Stdin)
+		question, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
 		}
-	*/
-	fmt.Println(generateContext())
+		chatWitModels(question, MODEL_IA_GPT_OSS_20B)
+	}
+
+	//fmt.Println(generateContext())
 
 }
