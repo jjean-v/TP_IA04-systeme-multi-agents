@@ -48,3 +48,43 @@ func JsonResponse(body []byte, result any) any {
 
 	return result
 }
+
+func PrepareRequestWithContext(question string, ia string) []byte {
+
+	// Prepare the request
+
+	// Add previous conversation
+	context := generateContext()
+	message := MessageRequest{"user", question}
+
+	// Add actual question
+	context = append(context, message)
+
+	request := Request{ia, context}
+
+	buffer, errMarshal2 := json.Marshal(request)
+	if errMarshal2 != nil {
+		log.Fatal(errMarshal2)
+	}
+	return buffer
+
+}
+
+func PrepareRequestWithoutContext(question string, ia string) []byte {
+	prompt := `You are receiving a tuple, response and message, extracted from previous AI responses. 
+		your goal is to summarize this into a direct message that the AI will then be able to use to have access to useful information about the previous discussion.
+		I want yout to keep only the important information, who i am, what I'm looking for, ... Your answer must be pretty short few sentences.`
+
+	// Prepare the request
+
+	// Add actual question
+	message := []MessageRequest{{"user", prompt}, {"user", question}}
+
+	request := Request{ia, message}
+
+	buffer, errMarshal2 := json.Marshal(request)
+	if errMarshal2 != nil {
+		log.Fatal(errMarshal2)
+	}
+	return buffer
+}

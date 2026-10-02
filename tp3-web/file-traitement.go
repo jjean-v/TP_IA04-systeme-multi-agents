@@ -11,7 +11,7 @@ import (
 var wd, _ = os.Getwd()
 var PATH = filepath.Join(wd, "conversation", "chat1.md")
 
-func storeConversation(message string) {
+func StoreConversation(message string) {
 
 	file, err := os.OpenFile(PATH, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {

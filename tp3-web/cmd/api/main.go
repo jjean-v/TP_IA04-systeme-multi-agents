@@ -22,9 +22,20 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		tp3web.ChatWitModels(question, MODEL_IA_GPT_OSS_20B)
+		request := tp3web.PrepareRequestWithContext(question, MODEL_IA_GPT_OSS_20B)
+		result := tp3web.ChatWitModels(request, false)
+
+		for _, element := range result.Choices {
+			fmt.Println(element.Message.Content)
+			reasoning := tp3web.Reasoning(element.Message.Reasoning, MODEL_IA_GPT_OSS_SAFEGUARD_20B)
+			//tp3web.StoreConversation("reasoning: " + reasoning.Model)
+			for _, reason := range reasoning.Choices {
+				fmt.Println("\n\n Reasoning:" + string(reason.Message.Content) + "\n\n")
+				tp3web.StoreConversation("reasoning: " + reason.Message.Content)
+			}
+
+		}
 	}
-
-	//fmt.Println(generateContext())
-
 }
+
+//fmt.Println(generateContext())

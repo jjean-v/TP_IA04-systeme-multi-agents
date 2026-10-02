@@ -1,9 +1,7 @@
 package tp3web
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 )
 
 type Model struct {
@@ -53,23 +51,7 @@ func GetModel() {
 	}
 }
 
-func ChatWitModels(question string, ia string) {
-
-	// Prepare the request
-
-	// Add previous conversation
-	context := generateContext()
-	message := MessageRequest{"user", question}
-
-	// Add actual question
-	context = append(context, message)
-
-	request := Request{ia, context}
-
-	buffer, errMarshal2 := json.Marshal(request)
-	if errMarshal2 != nil {
-		log.Fatal(errMarshal2)
-	}
+func ChatWitModels(buffer []byte, store bool) *ResponseRequest {
 
 	body := SendRequestPost(URL_MODEL_QUESTIONS, buffer)
 
@@ -78,8 +60,12 @@ func ChatWitModels(question string, ia string) {
 
 	JsonResponse(body, &response)
 
-	for _, element := range response.Choices {
-		fmt.Println(element.Message.Content)
-		storeConversation("reasoning: " + element.Message.Reasoning)
-	}
+	return &response
+}
+
+func Reasoning(question string, ia string) *ResponseRequest {
+
+	request := PrepareRequestWithoutContext(question, ia)
+
+	return ChatWitModels(request, true)
 }
