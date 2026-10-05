@@ -1,4 +1,4 @@
-package tp3web
+package com
 
 import (
 	"bytes"
@@ -40,6 +40,7 @@ func SendRequestPost(url string, data []byte) []byte {
 
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
+
 	return body
 
 }

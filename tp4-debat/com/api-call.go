@@ -1,4 +1,4 @@
-package tp3web
+package com
 
 import (
 	"fmt"
@@ -51,7 +51,7 @@ func GetModel() {
 	}
 }
 
-func ChatWitModels(buffer []byte, store bool) *ResponseRequest {
+func ChatWitModels(buffer []byte) *ResponseRequest {
 
 	body := SendRequestPost(URL_MODEL_QUESTIONS, buffer)
 
@@ -67,5 +67,5 @@ func Reasoning(question string, ia string) *ResponseRequest {
 
 	request := PrepareRequestWithoutContext(question, ia)
 
-	return ChatWitModels(request, true)
+	return ChatWitModels(request)
 }

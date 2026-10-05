@@ -1,4 +1,4 @@
-package tp3web
+package com
 
 import (
 	"encoding/json"

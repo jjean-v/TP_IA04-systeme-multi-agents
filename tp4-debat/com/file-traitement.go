@@ -1,4 +1,4 @@
-package tp3web
+package com
 
 import (
 	"bufio"
@@ -19,7 +19,7 @@ func StoreConversation(message string) {
 	}
 	defer file.Close()
 
-	_, err = file.WriteString(fmt.Sprintln(message + "\n"))
+	_, err = file.WriteString(fmt.Sprintln(message))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,6 +46,5 @@ func ReadAll() []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(content))
 	return content
 }

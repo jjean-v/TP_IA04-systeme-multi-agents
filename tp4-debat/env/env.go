@@ -1,7 +1,7 @@
 package env
 
 import (
-	"tp3web"
+	"tp4-debat/com"
 )
 
 type Environment struct {
@@ -14,16 +14,22 @@ const (
 	Answer
 )
 
+var test = Answer
+
+func NewEnvironment() *Environment {
+	return &Environment{}
+}
+
 func (env *Environment) Read() []byte {
-	message := tp3web.ReadAll()
+	message := com.ReadAll()
 	return message
 }
 
 func (env *Environment) Write(message string, messageType Type) {
 	switch messageType {
 	case Question:
-		tp3web.StoreConversation("Question: " + message)
+		com.StoreConversation("Question: " + message)
 	case Answer:
-		tp3web.StoreConversation("Answer: " + message)
+		com.StoreConversation("Answer: " + message)
 	}
 }
