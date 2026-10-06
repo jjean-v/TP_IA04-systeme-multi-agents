@@ -25,6 +25,7 @@ func (env *Environment) Read() []byte {
 	return message
 }
 
+// Need to add the Mutex
 func (env *Environment) Write(message string, messageType Type) {
 	switch messageType {
 	case Question:
