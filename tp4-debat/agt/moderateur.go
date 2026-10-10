@@ -1,39 +1,43 @@
 package agt
 
 import (
-	"fmt"
 	"log"
+	"time"
 )
 
-type chanMessage struct {
+type Moderateur struct {
+	id           string
+	count        int
+	cqueue       chan ChanMessage
+	lastResponse string
+}
+
+type ChanMessage struct {
 	AgentId  string
 	Crequest chan string
 }
 
-type Moderateur struct {
-	id     string
-	count  int
-	cqueue chan chanMessage
-}
-
-func NewModerateur(name string, c chan chanMessage) *Moderateur {
+func NewModerateur(name string, c chan ChanMessage) *Moderateur {
 	return &Moderateur{id: name, cqueue: c}
 }
 
 func (m *Moderateur) Percept() {
-	s := <-m.cqueue
-	switch s.AgentId {
-	case "agent 1":
-		log.Println("Tour de Agent1")
-		s.Crequest <- "Your turn"
-		<-s.Crequest
-		fmt.Println("Agent 1 a terminé")
-
-	case "agent 2":
-		log.Println("Tour de Agent2")
-		s.Crequest <- "Your turn"
-		<-s.Crequest
-		fmt.Println("Agent 2 a terminé")
+	for {
+		s := <-m.cqueue
+		switch s.AgentId {
+		case "agent1":
+			log.Println("Tour de Agent 1")
+			s.Crequest <- m.lastResponse
+			m.lastResponse = <-s.Crequest
+		case "agent2":
+			log.Println("Tour de Agent 2")
+			s.Crequest <- m.lastResponse
+			m.lastResponse = <-s.Crequest
+		}
+		m.count++
+		log.Println("Receive: ", m.lastResponse)
+		log.Println("Count: ", m.count)
+		time.Sleep(3 * time.Second)
 	}
 
 }

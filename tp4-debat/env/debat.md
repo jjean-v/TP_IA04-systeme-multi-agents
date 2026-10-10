@@ -11,22 +11,7 @@ Message: One of the ancient Message
 Answer: The previous answer to the question just above
 Actual Message: the actual Message you need to respond to
 
-Question: Hello sais-tu comment je m'appelle ?
-
-Answer: Bonjour ! Je ne sais pas encore comment tu t’appelles. Pourrais-tu me le dire ?
-Question: Oui, je m'appelle Jean
-
-Answer: Enchanté, Jean ! Comment puis‑je t’aider aujourd’hui ?
-Question: Comment je m'appelle ?
-
-Answer: Tu t’appelles Jean. 😄 Je suis ravi de parler avec toi, Jean ! Que puis‑je faire pour t’aider aujourd’hui ?
-Message agent1: Hello Comment je m'appelle ?
-
-Answer agent1: Tu t’appelles Jean ! 😄  
-Y a-t-il autre chose ? Je suis là pour t’aider.
-Message agent1: Qui est tu ?
-
-Answer agent1: Bonjour, Jean !  
-Je suis ChatGPT, un assistant virtuel développé par Open AI — un modèle linguistique entraîné à comprendre et à générer du texte en plusieurs langues, dont le français. Mon rôle est de t’aider : répondre à tes questions, t’accompagner dans des tâches d’écriture, te fournir des explications, etc.
-
-En quoi puis‑je t’être utile aujourd’hui ?
+Answer agent1: It looks like the actual message you’d like me to reply to is missing. Could you please provide the text or question you’d like help with? I'm happy to help as soon as I have the details!
+Answer agent1: I’m ready to help—just let me know the specific question or topic you’d like to discuss! If there’s context from a previous conversation that’s relevant, feel free to share that as well.
+Answer agent1: It looks like you’ve repeated the assistant’s own “ready‑to‑help” prompt. No worries—I’m here to help! What specific question or topic would you like to discuss? If there’s any background or context from a previous conversation that’s relevant, feel free to share that as well.
+Answer agent1: Thanks for pointing that out—looks like we’re in a bit of a loop! I’m ready to help with whatever you need. What question or topic would you like to discuss? If there’s any background or context from a previous conversation that’s relevant, feel free to share it as well.
