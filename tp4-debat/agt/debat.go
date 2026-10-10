@@ -2,7 +2,6 @@ package agt
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"tp4-debat/com"
 	"tp4-debat/env"
@@ -22,6 +21,7 @@ type Agent interface {
 
 type Debater struct {
 	id         string
+	prompt     string
 	discussion *com.MessageRequest
 	Crequest   chan ChanMessage
 	Creceive   chan string
@@ -30,6 +30,10 @@ type Debater struct {
 func NewAgentDebater(name string, c chan ChanMessage) *Debater {
 	chanReceive := make(chan string)
 	return &Debater{id: name, Crequest: c, Creceive: chanReceive}
+}
+
+func (d *Debater) Start(prompt string) {
+	d.prompt = prompt
 }
 
 func (d *Debater) Percept(env env.Environment) {
@@ -51,7 +55,7 @@ func (d *Debater) Act(envReal *env.Environment) {
 
 	//envReal.Write(d.id+": "+question, env.Question)
 	// Add the question to the prompt
-	listQuestion := []com.MessageRequest{*d.discussion, {"user", "Actual Message: " + message}}
+	listQuestion := []com.MessageRequest{{"user", d.prompt}, *d.discussion, {"user", "Actual Message: " + message}}
 
 	// Prepare request
 	request := com.Request{MODEL_IA_GPT_OSS_20B, listQuestion}
@@ -68,7 +72,6 @@ func (d *Debater) Act(envReal *env.Environment) {
 	for _, element := range result.Choices {
 		response = element.Message.Content
 		envReal.Write(d.id+": "+element.Message.Content, env.Answer)
-		fmt.Println(element.Message.Content)
 	}
 
 	d.Creceive <- response

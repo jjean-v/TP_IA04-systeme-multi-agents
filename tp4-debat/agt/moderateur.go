@@ -25,17 +25,16 @@ func (m *Moderateur) Percept() {
 	for {
 		s := <-m.cqueue
 		switch s.AgentId {
-		case "agent1":
-			log.Println("Tour de Agent 1")
+		case "Robert":
+			log.Println("Tour de Robert")
 			s.Crequest <- m.lastResponse
 			m.lastResponse = <-s.Crequest
-		case "agent2":
-			log.Println("Tour de Agent 2")
+		case "Dr Stone":
+			log.Println("Tour de Dr Stone")
 			s.Crequest <- m.lastResponse
 			m.lastResponse = <-s.Crequest
 		}
 		m.count++
-		log.Println("Receive: ", m.lastResponse)
 		log.Println("Count: ", m.count)
 		time.Sleep(3 * time.Second)
 	}
