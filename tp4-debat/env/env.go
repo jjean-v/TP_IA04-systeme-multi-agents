@@ -29,8 +29,8 @@ func (env *Environment) Read() []byte {
 func (env *Environment) Write(message string, messageType Type) {
 	switch messageType {
 	case Question:
-		com.StoreConversation("Question: " + message)
+		com.StoreConversation("Message " + message)
 	case Answer:
-		com.StoreConversation("Answer: " + message)
+		com.StoreConversation("Answer " + message)
 	}
 }

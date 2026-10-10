@@ -21,12 +21,15 @@ type Agent interface {
 }
 
 type Debater struct {
-	//chanRequest chan string
+	id         string
 	discussion *com.MessageRequest
+	Crequest   chan chanMessage
+	Creceive   chan string
 }
 
-func NewAgentDebater() *Debater {
-	return &Debater{}
+func NewAgentDebater(name string, c chan chanMessage) *Debater {
+	chanReceive := make(chan string)
+	return &Debater{id: name, Crequest: c, Creceive: chanReceive}
 }
 
 func (d *Debater) Percept(env env.Environment) {
@@ -34,11 +37,21 @@ func (d *Debater) Percept(env env.Environment) {
 	d.discussion = &com.MessageRequest{"user", string(ancientPrompt)}
 }
 
+func (d *Debater) Deliberate() {
+
+	request := chanMessage{AgentId: d.id, Crequest: d.Creceive}
+	d.Crequest <- request // Envoi de la demande d'action
+
+}
+
 func (d *Debater) Act(envReal *env.Environment, question string) {
-	storeType := env.Question
-	envReal.Write(question, storeType)
+	message := <-d.Creceive
+	log.Println("Message receive")
+	fmt.Println(message)
+
+	envReal.Write(d.id+": "+question, env.Question)
 	// Add the question to the prompt
-	listQuestion := []com.MessageRequest{*d.discussion, {"user", "Actual question: " + question}}
+	listQuestion := []com.MessageRequest{*d.discussion, {"user", "Actual Message: " + question}}
 
 	// Prepare request
 	request := com.Request{MODEL_IA_GPT_OSS_20B, listQuestion}
@@ -50,10 +63,12 @@ func (d *Debater) Act(envReal *env.Environment, question string) {
 
 	// Send question
 	result := com.ChatWitModels(buffer) // type ReponseRequest
-	storeType = env.Answer
+
 	for _, element := range result.Choices {
-		envReal.Write(element.Message.Content, storeType)
+		envReal.Write(d.id+": "+element.Message.Content, env.Answer)
 		fmt.Println(element.Message.Content)
 	}
+
+	d.Creceive <- "Finish"
 
 }

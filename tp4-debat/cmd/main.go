@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	debater1 := agt.NewAgentDebater()
+
+	debater1 := agt.NewAgentDebater("agent1")
 	env1 := env.NewEnvironment()
 
 	for {
@@ -25,4 +26,5 @@ func main() {
 		//debater1.Deliberate()
 		debater1.Act(env1, question)
 	}
+
 }
