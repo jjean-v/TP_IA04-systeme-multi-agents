@@ -82,23 +82,7 @@ func main() {
 	}()
 
 	fmt.Scanln()
-	/*
-		for {
-			go func() {
-				moderateur.Percept()
-			}()
-			go func() {
-				debater1.Percept(*env1)
-				debater1.Deliberate()
-				debater1.Act(env1)
-			}()
-			go func() {
-				debater2.Percept(*env1)
-				debater2.Deliberate()
-				debater2.Act(env1)
-			}()
 
-	*/
 	/*
 		fmt.Print("Question: ")
 		reader := bufio.NewReader(os.Stdin)
