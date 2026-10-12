@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"tp4-debat/agt"
 	"tp4-debat/env"
+	"tp4-debat/simu"
 )
 
 const prompt1 = `You are Robert, a committed flat-earther in your 50s. 
@@ -79,7 +79,7 @@ func main() {
 	chanJuge := make(chan string)
 
 	moderateur := agt.NewModerateur("modo1", chanModo, chanJuge, 6)
-	juge := agt.NewJuge(chanJuge, promptJuge)
+	juge := agt.NewJuge(chanJuge)
 
 	debater1 := agt.NewAgentDebater("Robert", chanModo)
 	debater2 := agt.NewAgentDebater("Dr Stone", chanModo)
@@ -87,36 +87,44 @@ func main() {
 	env1 := env.NewEnvironment()
 	debater1.Start(prompt1)
 	debater2.Start(prompt2)
+	juge.Start(promptJuge)
+
+	listAgent := []agt.Agent{debater1, debater2, juge}
+
+	simu := simu.SimulationMA{Env: env1, Agts: listAgent}
+
+	simu.Run()
 
 	go func() {
-		log.Println("Lancement du modérateur")
 		moderateur.Act(env1)
 
 	}()
+	/*
 
-	go func() {
-		for {
-			debater1.Percept(*env1)
-			debater1.Deliberate()
-			debater1.Act(env1)
-		}
-	}()
 
-	go func() {
-		for {
-			debater2.Percept(*env1)
-			debater2.Deliberate()
-			debater2.Act(env1)
-		}
-	}()
+		go func() {
+			for {
+				debater1.Percept(*env1)
+				debater1.Deliberate()
+				debater1.Act(env1)
+			}
+		}()
 
-	go func() {
-		for {
-			juge.Percept(*env1)
-			juge.Deliberate()
-		}
-	}()
+		go func() {
+			for {
+				debater2.Percept(*env1)
+				debater2.Deliberate()
+				debater2.Act(env1)
+			}
+		}()
 
+		go func() {
+			for {
+				juge.Percept(*env1)
+				juge.Deliberate()
+			}
+		}()
+	*/
 	fmt.Scanln()
 
 	/*

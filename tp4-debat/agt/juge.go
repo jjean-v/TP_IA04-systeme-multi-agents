@@ -10,12 +10,15 @@ import (
 type Juge struct {
 	jugeChan chan string
 	debat    *com.MessageRequest
-	gagnant  string
 	prompt   string
 }
 
-func NewJuge(cjuge chan string, prompt string) *Juge {
-	return &Juge{jugeChan: cjuge, prompt: prompt}
+func NewJuge(cjuge chan string) *Juge {
+	return &Juge{jugeChan: cjuge}
+}
+
+func (j *Juge) Start(prompt string) {
+	j.prompt = prompt
 }
 
 func (j *Juge) Percept(e env.Environment) {
@@ -47,5 +50,9 @@ func (j *Juge) Deliberate() {
 	}
 
 	j.jugeChan <- response
+
+}
+
+func (j *Juge) Act(e *env.Environment) {
 
 }

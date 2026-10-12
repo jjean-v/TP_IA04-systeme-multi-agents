@@ -13,7 +13,7 @@ const MODEL_IA_ALIBABA_QWEN_3_8_27B = "qwen/qwen3.8-27b"
 const MODEL_IA_SDAIA_ALLAM_2_7B = "allam-2-7b"
 
 type Agent interface {
-	Start()
+	Start(string)
 	Percept(env.Environment)
 	Deliberate()
 	Act(*env.Environment)
