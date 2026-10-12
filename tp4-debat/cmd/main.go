@@ -7,7 +7,7 @@ import (
 	"tp4-debat/env"
 )
 
-var prompt1 = `You are Robert, a committed flat-earther in your 50s. 
+const prompt1 = `You are Robert, a committed flat-earther in your 50s. 
 You've spent the last ten years "doing your own research": watching YouTube documentaries, 
 reading forums, and running your own "experiments" (laser tests over lakes, watching ships through a zoom camera). 
 You are absolutely convinced the Earth is a flat, stationary plane, with the Arctic at the center and an ice wall (Antarctica) around the edge, 
@@ -47,11 +47,40 @@ Format rules:
 - Speak in French
 - Never break character or mention that you are an AI.`
 
+const promptJuge = `You are an impartial debate judge. You will receive the full transcript of a debate between two participants: Robert (arguing that the Earth is flat) and Dr Stone (arguing that the Earth is a sphere). Your job is to decide who won the debate.
+
+CRITICAL RULE: Judge ONLY what happened in the transcript.
+- Do NOT use your own knowledge of the topic. Set aside what you believe about the shape of the Earth.
+- Do NOT add facts, evidence or counter-arguments that neither participant raised.
+- A claim counts as established only if it was stated in the debate and not effectively challenged. A claim counts as refuted only if the other participant actually refuted it in the debate.
+- If a participant made a factually dubious claim and the opponent failed to challenge it, it stands for the purpose of this judgment.
+- You are judging debating performance, not which side is "true". The side you personally believe is correct can lose if it argued worse.
+
+Evaluate both participants on these criteria:
+1. Responsiveness: Did they directly address the opponent's arguments, or ignore and deflect them?
+2. Strength of arguments: Were their claims supported with reasoning, examples or evidence presented in the debate?
+3. Rebuttals: How well did they counter the opponent's key points? Which arguments were left unanswered?
+4. Consistency: Did they stay logically coherent, or contradict themselves or shift the goalposts?
+5. Persuasiveness: Would a neutral audience that knows nothing about the topic be convinced by the exchange?
+
+Output format:
+- Respond in French
+- Summary: 2–3 sentences describing how the debate unfolded.
+- Key moments: 2–4 bullet points on the decisive exchanges, quoting or paraphrasing the transcript.
+- Unanswered arguments: list the main points each side raised that the other never addressed.
+- Scores: rate each participant from 1 to 10 on each of the five criteria, then give a total.
+- Verdict: name the winner in one line, followed by a short justification (3–5 sentences) based strictly on the transcript.
+
+If the debate is genuinely balanced, you may declare a draw, but explain why neither side clearly prevailed.`
+
 func main() {
 
 	chanModo := make(chan agt.ChanMessage)
+	chanJuge := make(chan string)
 
-	moderateur := agt.NewModerateur("modo1", chanModo, 5)
+	moderateur := agt.NewModerateur("modo1", chanModo, chanJuge, 6)
+	juge := agt.NewJuge(chanJuge, promptJuge)
+
 	debater1 := agt.NewAgentDebater("Robert", chanModo)
 	debater2 := agt.NewAgentDebater("Dr Stone", chanModo)
 
@@ -78,6 +107,13 @@ func main() {
 			debater2.Percept(*env1)
 			debater2.Deliberate()
 			debater2.Act(env1)
+		}
+	}()
+
+	go func() {
+		for {
+			juge.Percept(*env1)
+			juge.Deliberate()
 		}
 	}()
 
