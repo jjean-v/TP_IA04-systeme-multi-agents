@@ -51,7 +51,7 @@ func main() {
 
 	chanModo := make(chan agt.ChanMessage)
 
-	moderateur := agt.NewModerateur("modo1", chanModo)
+	moderateur := agt.NewModerateur("modo1", chanModo, 5)
 	debater1 := agt.NewAgentDebater("Robert", chanModo)
 	debater2 := agt.NewAgentDebater("Dr Stone", chanModo)
 
@@ -61,7 +61,7 @@ func main() {
 
 	go func() {
 		log.Println("Lancement du modérateur")
-		moderateur.Percept()
+		moderateur.Act(env1)
 
 	}()
 

@@ -16,7 +16,7 @@ type Agent interface {
 	Start()
 	Percept(env.Environment)
 	Deliberate()
-	Act(*env.Environment, string)
+	Act(*env.Environment)
 }
 
 type Debater struct {
@@ -71,7 +71,7 @@ func (d *Debater) Act(envReal *env.Environment) {
 	var response string
 	for _, element := range result.Choices {
 		response = element.Message.Content
-		envReal.Write(d.id+": "+element.Message.Content, env.Answer)
+		//envReal.Write(d.id+": "+element.Message.Content, env.Answer)
 	}
 
 	d.Creceive <- response

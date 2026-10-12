@@ -26,11 +26,6 @@ func (env *Environment) Read() []byte {
 }
 
 // Need to add the Mutex
-func (env *Environment) Write(message string, messageType Type) {
-	switch messageType {
-	case Question:
-		com.StoreConversation("Message " + message + "\n")
-	case Answer:
-		com.StoreConversation("Answer " + message + "\n")
-	}
+func (env *Environment) Write(message string) {
+	com.StoreConversation(message + "\n")
 }
