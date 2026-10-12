@@ -20,16 +20,17 @@ type Agent interface {
 }
 
 type Debater struct {
-	id         string
-	prompt     string
-	discussion *com.MessageRequest
-	Crequest   chan ChanMessage
-	Creceive   chan string
+	id            string
+	prompt        string
+	discussion    *com.MessageRequest
+	Crequest      chan ChanMessage
+	Creceive      chan string
+	CSynthetiseur chan ChanMessageSynthetiseur
 }
 
-func NewAgentDebater(name string, c chan ChanMessage) *Debater {
+func NewAgentDebater(name string, c chan ChanMessage, cSynthetiseur chan ChanMessageSynthetiseur) *Debater {
 	chanReceive := make(chan string)
-	return &Debater{id: name, Crequest: c, Creceive: chanReceive}
+	return &Debater{id: name, Crequest: c, Creceive: chanReceive, CSynthetiseur: cSynthetiseur}
 }
 
 func (d *Debater) Start(prompt string) {
@@ -53,27 +54,31 @@ func (d *Debater) Act(envReal *env.Environment) {
 	message := <-d.Creceive
 	log.Println("Message receive")
 
-	//envReal.Write(d.id+": "+question, env.Question)
-	// Add the question to the prompt
-	listQuestion := []com.MessageRequest{{Role: "user", Content: d.prompt}, *d.discussion, {Role: "user", Content: "Actual Message: " + message}}
+	listQuestion := []com.MessageRequest{{Role: "user", Content: d.prompt}, *d.discussion, {Role: "user", Content: "Actual Message: " + message}} // Add the question to the prompt
 
-	// Prepare request
-	request := com.Request{Model: MODEL_IA_GPT_OSS_20B, Messages: listQuestion}
-	// Transform into []byte
-	buffer, errMarshal2 := json.Marshal(request)
+	request := com.Request{Model: MODEL_IA_GPT_OSS_20B, Messages: listQuestion} // Prepare request
+
+	buffer, errMarshal2 := json.Marshal(request) // Transform into []byte
+
 	if errMarshal2 != nil {
 		log.Fatal(errMarshal2)
 	}
 
-	// Send question
-	result := com.ChatWitModels(buffer) // type ReponseRequest
+	result := com.ChatWitModels(buffer) // Send question
 
-	var response string
+	var reponse string
 	for _, element := range result.Choices {
-		response = element.Message.Content
-		//envReal.Write(d.id+": "+element.Message.Content, env.Answer)
+		reponse = element.Message.Content
 	}
 
-	d.Creceive <- response
+	if len(reponse) > 700 {
+		c := make(chan string)
+		log.Printf("Message trop long: %d", len(reponse))
+
+		d.CSynthetiseur <- ChanMessageSynthetiseur{reponse, c}
+		reponse = <-c
+	}
+
+	d.Creceive <- reponse
 
 }

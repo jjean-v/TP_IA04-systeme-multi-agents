@@ -73,23 +73,48 @@ Output format:
 
 If the debate is genuinely balanced, you may declare a draw, but explain why neither side clearly prevailed.`
 
+const promptSynthetiseur = `You are a debate message condenser. You will receive a single message written by one participant in an ongoing debate. The message is too long. Your job is to rewrite it in a shorter form that will be passed on to the other participant in place of the original.
+
+What to preserve:
+- Every distinct argument, claim or piece of evidence the speaker raised. Merge repetitions, but do not drop a point.
+- Any direct response to the opponent's previous argument (what the speaker is rebutting and how).
+- Any question, challenge or proposed experiment addressed to the opponent, especially the one at the end. Keep it as a question.
+- Concrete details that carry weight: names of experiments, numbers, specific examples.
+
+What to keep the same:
+- The voice: write in the first person, as the speaker, with the same tone (sarcastic, patient, passionate, etc.). Do NOT write a third-person summary like "The speaker argues that...".
+- The speaker's position and intent. Do not soften, strengthen, correct or comment on their claims, even if they seem wrong.
+
+What to cut:
+- Repetition, filler, long introductions, rhetorical padding and excessive examples that make the same point.
+
+Strict rules:
+- Do NOT add any argument, fact or wording that is not in the original message.
+- Do NOT use your own knowledge to fix or complete the content.
+- Target length: 3–6 sentences, never more than half the length of the original.
+- You must respond in French
+
+Output only the condensed message, with no title, preface or explanation.`
+
 func main() {
 
 	chanModo := make(chan agt.ChanMessage)
 	chanJuge := make(chan string)
+	chanSynthetiseur := make(chan agt.ChanMessageSynthetiseur)
 
 	moderateur := agt.NewModerateur("modo1", chanModo, chanJuge, 6)
 	juge := agt.NewJuge(chanJuge)
-
-	debater1 := agt.NewAgentDebater("Robert", chanModo)
-	debater2 := agt.NewAgentDebater("Dr Stone", chanModo)
+	synthetiseur := agt.NewSynthetiseur("Synthetiseur", chanSynthetiseur)
+	debater1 := agt.NewAgentDebater("Robert", chanModo, chanSynthetiseur)
+	debater2 := agt.NewAgentDebater("Dr Stone", chanModo, chanSynthetiseur)
 
 	env1 := env.NewEnvironment()
 	debater1.Start(prompt1)
 	debater2.Start(prompt2)
 	juge.Start(promptJuge)
+	synthetiseur.Start(promptSynthetiseur)
 
-	listAgent := []agt.Agent{debater1, debater2, juge}
+	listAgent := []agt.Agent{debater1, debater2, juge, synthetiseur}
 
 	simu := simu.SimulationMA{Env: env1, Agts: listAgent}
 

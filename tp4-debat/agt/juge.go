@@ -46,7 +46,6 @@ func (j *Juge) Deliberate() {
 	var response string
 	for _, element := range result.Choices {
 		response = element.Message.Content
-		//envReal.Write(d.id+": "+element.Message.Content, env.Answer)
 	}
 
 	j.jugeChan <- response
