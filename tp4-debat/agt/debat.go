@@ -38,7 +38,7 @@ func (d *Debater) Start(prompt string) {
 
 func (d *Debater) Percept(env env.Environment) {
 	ancientPrompt := env.Read()
-	d.discussion = &com.MessageRequest{"user", string(ancientPrompt)}
+	d.discussion = &com.MessageRequest{Role: "user", Content: string(ancientPrompt)}
 }
 
 func (d *Debater) Deliberate() {
@@ -55,10 +55,10 @@ func (d *Debater) Act(envReal *env.Environment) {
 
 	//envReal.Write(d.id+": "+question, env.Question)
 	// Add the question to the prompt
-	listQuestion := []com.MessageRequest{{"user", d.prompt}, *d.discussion, {"user", "Actual Message: " + message}}
+	listQuestion := []com.MessageRequest{{Role: "user", Content: d.prompt}, *d.discussion, {Role: "user", Content: "Actual Message: " + message}}
 
 	// Prepare request
-	request := com.Request{MODEL_IA_GPT_OSS_20B, listQuestion}
+	request := com.Request{Model: MODEL_IA_GPT_OSS_20B, Messages: listQuestion}
 	// Transform into []byte
 	buffer, errMarshal2 := json.Marshal(request)
 	if errMarshal2 != nil {
