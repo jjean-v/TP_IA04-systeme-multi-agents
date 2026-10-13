@@ -2,6 +2,7 @@ package com
 
 import (
 	"fmt"
+	"log"
 )
 
 type Model struct {
@@ -28,8 +29,13 @@ type ContentResponse struct {
 }
 
 type ResponseRequest struct {
+	Error   ErrorMessage      `json:error`
 	Model   string            `json:"model"`
 	Choices []ContentResponse `json:"choices"`
+}
+
+type ErrorMessage struct {
+	Message string `json:message`
 }
 
 func GetModel() {
@@ -55,6 +61,7 @@ func ChatWitModels(buffer []byte) *ResponseRequest {
 
 	body := SendRequestPost(URL_MODEL_QUESTIONS, buffer)
 
+	log.Println(string(body))
 	// Unmarshal the response
 	var response ResponseRequest
 

@@ -3,6 +3,7 @@ package agt
 import (
 	"encoding/json"
 	"log"
+	"time"
 	"tp4-debat/com"
 	"tp4-debat/env"
 )
@@ -51,7 +52,7 @@ func (d *Debater) Act(envReal *env.Environment) {
 
 	listQuestion := []com.MessageRequest{{Role: "user", Content: d.prompt}, *d.discussion, {Role: "user", Content: "Actual Message: " + message}} // Add the question to the prompt
 
-	request := com.Request{Model: MODEL_IA_GPT_OSS_20B, Messages: listQuestion} // Prepare request
+	request := com.Request{Model: MODEL_IA_ALIBABA_QWEN_3_8_27B, Messages: listQuestion} // Prepare request
 
 	buffer, errMarshal2 := json.Marshal(request) // Transform into []byte
 
@@ -61,14 +62,22 @@ func (d *Debater) Act(envReal *env.Environment) {
 
 	result := com.ChatWitModels(buffer) // Send question
 
+	if len(result.Choices) == 0 {
+		log.Println("Erreur Appel API")
+		log.Fatal(result.Error.Message)
+	}
+
 	var reponse string
+
 	for _, element := range result.Choices {
 		reponse = element.Message.Content
+
 	}
 
 	if len(reponse) > 700 {
 		c := make(chan string)
 		log.Printf("Message trop long: %d", len(reponse))
+		time.Sleep(3 * time.Second)
 
 		d.CSynthetiseur <- ChanMessageSynthetiseur{reponse, c}
 		reponse = <-c
