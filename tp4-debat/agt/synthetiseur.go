@@ -35,7 +35,7 @@ func (s *Synthetiseur) Percept(e env.Environment) {
 func (s *Synthetiseur) Deliberate() {
 	listQuestion := []com.MessageRequest{{Role: "user", Content: s.prompt}, {Role: "user", Content: s.request.message}}
 
-	request := com.Request{Model: MODEL_IA_GPT_OSS_20B, Messages: listQuestion} // Prepare request
+	request := com.Request{Model: MODEL_IA_SDAIA_ALLAM_2_7B, Messages: listQuestion} // Prepare request
 
 	buffer, errMarshal2 := json.Marshal(request) // Transform into []byte
 

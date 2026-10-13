@@ -29,6 +29,7 @@ func (j *Juge) Percept(e env.Environment) {
 }
 
 func (j *Juge) Deliberate() {
+	log.Println("Le juge délibère encore")
 
 	listQuestion := []com.MessageRequest{{Role: "user", Content: j.prompt}, *j.debat}
 
@@ -43,7 +44,13 @@ func (j *Juge) Deliberate() {
 	// Send question
 	result := com.ChatWitModels(buffer) // type ReponseRequest
 
+	if len(result.Choices) == 0 {
+		log.Println("Erreur Appel API")
+		log.Fatal(result.Error.Message)
+	}
+
 	var response string
+
 	for _, element := range result.Choices {
 		response = element.Message.Content
 	}
