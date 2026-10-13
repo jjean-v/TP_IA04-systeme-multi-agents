@@ -1,10 +1,12 @@
 package env
 
 import (
+	"sync"
 	"tp4-debat/com"
 )
 
 type Environment struct {
+	l sync.Mutex
 }
 
 type Type int
@@ -27,5 +29,7 @@ func (env *Environment) Read() []byte {
 
 // Need to add the Mutex
 func (env *Environment) Write(message string) {
+	env.l.Lock()
 	com.StoreConversation(message + "\n")
+	env.l.Unlock()
 }
