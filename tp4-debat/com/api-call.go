@@ -2,7 +2,6 @@ package com
 
 import (
 	"fmt"
-	"log"
 )
 
 type Model struct {
@@ -61,7 +60,6 @@ func ChatWitModels(buffer []byte) *ResponseRequest {
 
 	body := SendRequestPost(URL_MODEL_QUESTIONS, buffer)
 
-	log.Println(string(body))
 	// Unmarshal the response
 	var response ResponseRequest
 
