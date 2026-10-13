@@ -40,7 +40,7 @@ func (m *Moderateur) Act(e *env.Environment) {
 
 		}
 		m.count--
-		time.Sleep(3 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 	log.Printf("Count : %d \n", m.count)
 	log.Println("Appel de juge")

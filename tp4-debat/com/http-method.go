@@ -39,7 +39,11 @@ func SendRequestPost(url string, data []byte) []byte {
 	}
 
 	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+
+	if body == nil {
+		fmt.Println(err)
+	}
 
 	return body
 
