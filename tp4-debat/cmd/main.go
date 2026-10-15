@@ -124,45 +124,6 @@ func main() {
 		moderateur.Act(env1)
 
 	}()
-	/*
 
-
-		go func() {
-			for {
-				debater1.Percept(*env1)
-				debater1.Deliberate()
-				debater1.Act(env1)
-			}
-		}()
-
-		go func() {
-			for {
-				debater2.Percept(*env1)
-				debater2.Deliberate()
-				debater2.Act(env1)
-			}
-		}()
-
-		go func() {
-			for {
-				juge.Percept(*env1)
-				juge.Deliberate()
-			}
-		}()
-	*/
 	fmt.Scanln()
-
-	/*
-		fmt.Print("Question: ")
-		reader := bufio.NewReader(os.Stdin)
-		question, err := reader.ReadString('\n')
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		debater1.Percept(*env1)
-		//debater1.Deliberate()
-		debater1.Act(env1, question)
-	*/
-
 }
