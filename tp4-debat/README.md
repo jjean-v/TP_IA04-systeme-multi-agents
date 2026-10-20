@@ -11,3 +11,5 @@ Au bout d'un nombre de tour donné, le Modérateur arrête le débat et appelle 
 Chaque agent Débatteur, peut à tous moment, lorsque leur réponse est trop grande, appeller un agent **Synthetiseur** qui devra réduire la réponse de l'agent, dans un souci d'économie des tokens.
 
 Le débat complet avec le rapport du juge est stocké dans le fichier **debat.md**
+
+Les prompts des agents peuvent être modifié, ils sont stockés dans le fichier **main**
