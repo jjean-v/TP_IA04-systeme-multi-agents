@@ -25,7 +25,3 @@ Voici quelques commandes utiles afin de développer dans de bonnes conditions
     go build <filename/repo>    // Construire l'exécutable
 
     go install <filename/repo>  // L'executable est ajouté dans votre /bin
-
-
-
-
