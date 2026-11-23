@@ -20,7 +20,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
+	"tp5-tools/tool"
 )
 
 // ---------- Types de l'API (sous-ensemble du format OpenAI) ----------
@@ -196,6 +196,25 @@ var tools = map[string]Tool{
 			defer file.Close()
 			return "Fichier Crée", nil
 		}),
+	"read_wikipedia": newTool(
+		"read_wikipedia",
+		"Lire une page wikipédia",
+		map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"article": map[string]any{"type": "string", "description": "nom de la page wikipédia"},
+			},
+			"required": []string{"article"},
+		},
+		func(args map[string]any) (string, error) {
+			article, _ := args["article"].(string)
+			file, err := os.Create(article)
+			if err != nil {
+				return "", err
+			}
+			defer file.Close()
+			return "Fichier Crée", nil
+		}),
 }
 
 func execute(tc ToolCall) string {
@@ -252,6 +271,7 @@ func runAgent(ctx context.Context, task string) (string, error) {
 	return "", errors.New("nombre maximal d'étapes atteint")
 }
 
+/*
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("usage : go run . \"tâche\"")
@@ -266,4 +286,19 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println(answer)
+}
+*/
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("usage : go run . \"tâche\"")
+		return
+	}
+	answer, err := tool.Chat(strings.Join(os.Args[1:], " "))
+	if err != nil {
+		fmt.Println("échec :", err)
+		os.Exit(1)
+	}
+	fmt.Println(answer)
+
 }
