@@ -20,6 +20,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 	"tp5-tools/tool"
 )
 
@@ -208,12 +209,11 @@ var tools = map[string]Tool{
 		},
 		func(args map[string]any) (string, error) {
 			article, _ := args["article"].(string)
-			file, err := os.Create(article)
+			response, err := tool.Chat(article)
 			if err != nil {
 				return "", err
 			}
-			defer file.Close()
-			return "Fichier Crée", nil
+			return response.Abstract, nil
 		}),
 }
 
@@ -264,14 +264,16 @@ func runAgent(ctx context.Context, task string) (string, error) {
 		}
 		for _, tc := range msg.ToolCalls {
 			res := execute(tc)
-			fmt.Printf("  [outil] %s(%s) -> %s\n", tc.Function.Name, tc.Function.Arguments, res)
+			if tc.Function.Name != "read_wikipedia" {
+				fmt.Printf("  [outil] %s(%s) -> %s\n", tc.Function.Name, tc.Function.Arguments, res)
+			}
 			history = append(history, Message{Role: "tool", ToolCallID: tc.ID, Content: res})
+
 		}
 	}
 	return "", errors.New("nombre maximal d'étapes atteint")
 }
 
-/*
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("usage : go run . \"tâche\"")
@@ -286,19 +288,4 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println(answer)
-}
-*/
-
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("usage : go run . \"tâche\"")
-		return
-	}
-	answer, err := tool.Chat(strings.Join(os.Args[1:], " "))
-	if err != nil {
-		fmt.Println("échec :", err)
-		os.Exit(1)
-	}
-	fmt.Println(answer)
-
 }

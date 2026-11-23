@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
@@ -42,7 +41,6 @@ func Chat(article string) (WikiResponse, error) {
 	url := os.Getenv("WIKI_URL") + article
 	request := NewWikiMessage()
 	body, _ := json.Marshal(request)
-	log.Println(string(body))
 	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
 		return WikiResponse{}, err
@@ -57,13 +55,10 @@ func Chat(article string) (WikiResponse, error) {
 		return WikiResponse{}, err
 	}
 	defer resp.Body.Close()
-	log.Println(resp.StatusCode)
 	if resp.StatusCode != http.StatusOK {
-		log.Println("ICI")
 		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
 		return WikiResponse{}, fmt.Errorf("HTTP %d : %s", resp.StatusCode, msg)
 	}
-	log.Println("ET LA")
 
 	var wr []WikiResponse
 	if err := json.NewDecoder(resp.Body).Decode(&wr); err != nil {
