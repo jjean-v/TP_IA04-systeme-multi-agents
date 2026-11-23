@@ -158,6 +158,44 @@ var tools = map[string]Tool{
 			b, _ := args["b"].(float64)
 			return strconv.FormatFloat(a*b, 'f', -1, 64), nil
 		}),
+	"substract": newTool(
+		"substract",
+		"Soustrais deux nombres.",
+		map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"a": map[string]any{"type": "number"},
+				"b": map[string]any{"type": "number"},
+			},
+			"required": []string{"a", "b"},
+		},
+		func(args map[string]any) (string, error) {
+			a, _ := args["a"].(float64)
+			b, _ := args["b"].(float64)
+			return strconv.FormatFloat(a-b, 'f', -1, 64), nil
+		}),
+	"create_file": newTool(
+		"create_file",
+		"Crée un fichier",
+		map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"path": map[string]any{"type": "string", "description": "chemin du fichier"},
+			},
+			"required": []string{"path"},
+		},
+		func(args map[string]any) (string, error) {
+			path, _ := args["path"].(string)
+			if strings.Contains(path, "..") || strings.HasPrefix(path, "/") {
+				return "", errors.New("accès refusé") // moindre privilège
+			}
+			file, err := os.Create(path)
+			if err != nil {
+				return "", err
+			}
+			defer file.Close()
+			return "Fichier Crée", nil
+		}),
 }
 
 func execute(tc ToolCall) string {
